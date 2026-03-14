@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2 class="mb-4">Expense Visualization</h2>
+
+<div class="card p-4">
+
+<canvas id="pieChart"></canvas>
+
+</div>
+
+<br>
+
+<div class="card p-4">
+
+<canvas id="lineChart"></canvas>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+var labels = {{ labels|safe }};
+var data = {{ data|safe }};
+
+new Chart(document.getElementById("pieChart"), {
+
+type:'pie',
+
+data:{
+labels:labels,
+datasets:[{
+data:data
+}]
+}
+
+});
+
+
+new Chart(document.getElementById("lineChart"), {
+
+type:'line',
+
+data:{
+labels:labels,
+datasets:[{
+label:"Expenses",
+data:data
+}]
+}
+
+});
+
+</script>
+
+{% endblock %}
