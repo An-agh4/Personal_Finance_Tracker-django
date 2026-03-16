@@ -2,26 +2,26 @@
 
 {% block content %}
 
-<h2 class="mb-4">Dashboard</h2>
+<h2 class="mb-4 text-center">Dashboard</h2>
 
-<div class="row">
+<div class="row mb-4">
 
 <div class="col-md-4">
-<div class="card p-3 text-center bg-success text-white">
+<div class="dashboard-card income-card">
 <h5>Total Income</h5>
 <h2>₹{{ total_income }}</h2>
 </div>
 </div>
 
 <div class="col-md-4">
-<div class="card p-3 text-center bg-danger text-white">
+<div class="dashboard-card expense-card">
 <h5>Total Expense</h5>
 <h2>₹{{ total_expense }}</h2>
 </div>
 </div>
 
 <div class="col-md-4">
-<div class="card p-3 text-center bg-primary text-white">
+<div class="dashboard-card balance-card">
 <h5>Balance</h5>
 <h2>₹{{ balance }}</h2>
 </div>
@@ -29,21 +29,29 @@
 
 </div>
 
-<br>
 
-<a class="btn btn-success me-2" href="/income">+ Add Income</a>
-<a class="btn btn-danger" href="/expense">+ Add Expense</a>
+<div class="row">
 
-<hr>
+<!-- Income Table -->
 
-<h4>Income List</h4>
+<div class="col-md-6">
 
-<table class="table table-striped">
+<div class="card p-3">
+
+<h4 class="mb-3">Income History</h4>
+
+<table class="table table-hover">
+
+<thead class="table-dark">
 
 <tr>
 <th>Category</th>
 <th>Amount</th>
 </tr>
+
+</thead>
+
+<tbody>
 
 {% for i in income %}
 
@@ -52,19 +60,44 @@
 <td>₹{{ i.amount }}</td>
 </tr>
 
+{% empty %}
+
+<tr>
+<td colspan="2">No income records</td>
+</tr>
+
 {% endfor %}
+
+</tbody>
 
 </table>
 
+</div>
 
-<h4>Expense List</h4>
+</div>
 
-<table class="table table-striped">
+
+
+<!-- Expense Table -->
+
+<div class="col-md-6">
+
+<div class="card p-3">
+
+<h4 class="mb-3">Expense History</h4>
+
+<table class="table table-hover">
+
+<thead class="table-dark">
 
 <tr>
 <th>Category</th>
 <th>Amount</th>
 </tr>
+
+</thead>
+
+<tbody>
 
 {% for e in expense %}
 
@@ -73,8 +106,22 @@
 <td>₹{{ e.amount }}</td>
 </tr>
 
+{% empty %}
+
+<tr>
+<td colspan="2">No expense records</td>
+</tr>
+
 {% endfor %}
 
+</tbody>
+
 </table>
+
+</div>
+
+</div>
+
+</div>
 
 {% endblock %}

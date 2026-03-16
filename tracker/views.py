@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from .models import Income, Expense, Category
 from .forms import IncomeForm, ExpenseForm
+from django.db.models import Sum
 
 
 def home(request):
@@ -23,63 +24,89 @@ def signup(request):
 
 @login_required
 def profile(request):
-    income = Income.objects.filter(user=request.user)
-    expense = Expense.objects.filter(user=request.user)
 
-    return render(request, "profile.html", {
-        "income": income,
-        "expense": expense
-    })
+    incomes = Income.objects.filter(user=request.user)
+    expenses = Expense.objects.filter(user=request.user)
+
+    total_income = incomes.aggregate(Sum('amount'))['amount__sum'] or 0
+    total_expense = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    balance = total_income - total_expense
+
+    context = {
+        'income': incomes,
+        'expense': expenses,
+        'total_income': total_income,
+        'total_expense': total_expense,
+        'balance': balance
+    }
+
+    return render(request, 'profile.html', context)
 
 
 @login_required
 def add_income(request):
 
+    categories = Category.objects.filter(type='income')
+
     if request.method == "POST":
-        form = IncomeForm(request.POST)
 
-        if form.is_valid():
-            income = form.save(commit=False)
-            income.user = request.user
-            income.save()
-            return redirect("profile")
+        amount = request.POST['amount']
+        category_id = request.POST['category']
 
-    else:
-        form = IncomeForm()
+        category = Category.objects.get(id=category_id)
 
-    return render(request, "income.html", {"form": form})
+        Income.objects.create(
+            user=request.user,
+            amount=amount,
+            category=category
+        )
 
+        return redirect('profile')
+
+    return render(request, "income.html", {"categories": categories})
 
 @login_required
 def add_expense(request):
 
+    categories = Category.objects.filter(type='expense')
+
     if request.method == "POST":
-        form = ExpenseForm(request.POST)
 
-        if form.is_valid():
-            expense = form.save(commit=False)
-            expense.user = request.user
-            expense.save()
-            return redirect("profile")
+        amount = request.POST['amount']
+        category_id = request.POST['category']
 
-    else:
-        form = ExpenseForm()
+        category = Category.objects.get(id=category_id)
 
-    return render(request, "expense.html", {"form": form})
+        Expense.objects.create(
+            user=request.user,
+            amount=amount,
+            category=category
+        )
+
+        return redirect('profile')
+
+    return render(request, "expense.html", {"categories": categories})
 
 @login_required
 def charts(request):
 
     expenses = Expense.objects.filter(user=request.user)
 
-    labels = []
-    data = []
+    data = (
+        expenses
+        .values('category__name')
+        .annotate(total=Sum('amount'))
+    )
 
-    for exp in expenses:
-        labels.append(exp.category.name)
-        data.append(exp.amount)
+    labels = []
+    values = []
+
+    for item in data:
+        labels.append(item['category__name'])
+        values.append(item['total'])
 
     return render(request, "charts.html", {
         "labels": labels,
-        "data": data
+        "data": values
     })

@@ -3,7 +3,14 @@ from django.contrib.auth.models import User
 
 
 class Category(models.Model):
+
+    CATEGORY_TYPE = (
+        ('income', 'Income'),
+        ('expense', 'Expense'),
+    )
+
     name = models.CharField(max_length=100)
+    type = models.CharField(max_length=10, choices=CATEGORY_TYPE)
 
     def __str__(self):
         return self.name
